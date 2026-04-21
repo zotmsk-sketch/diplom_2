@@ -14,6 +14,7 @@ import utils.UserGenerator;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.http.HttpStatus.*;
 import static org.hamcrest.Matchers.*;
 
 public class CreateOrderTest {
@@ -29,7 +30,7 @@ public class CreateOrderTest {
         userClient = new UserClient();
 
         user = UserGenerator.generateRandomUser();
-        userClient.register(user).then().statusCode(200);
+        userClient.register(user).then().statusCode(SC_OK);
         accessToken = userClient.extractAccessToken(userClient.login(user).then().extract().response());
         validIngredientHash = orderClient.getValidIngredientHash();
     }
@@ -49,7 +50,7 @@ public class CreateOrderTest {
         var response = orderClient.createOrder(order, accessToken);
 
         response.then()
-                .statusCode(200)
+                .statusCode(SC_OK)
                 .body("success", is(true))
                 .body("name", notNullValue())
                 .body("order.number", notNullValue());
@@ -63,7 +64,7 @@ public class CreateOrderTest {
         var response = orderClient.createOrder(order, null);
 
         response.then()
-                .statusCode(200)
+                .statusCode(SC_OK)
                 .body("success", is(true))
                 .body("name", notNullValue())
                 .body("order.number", notNullValue());
@@ -78,7 +79,7 @@ public class CreateOrderTest {
         var response = orderClient.createOrder(order, accessToken);
 
         response.then()
-                .statusCode(200)
+                .statusCode(SC_OK)
                 .body("success", is(true))
                 .body("order.number", notNullValue());
     }
@@ -91,7 +92,7 @@ public class CreateOrderTest {
         var response = orderClient.createOrder(order, accessToken);
 
         response.then()
-                .statusCode(400)
+                .statusCode(SC_BAD_REQUEST)
                 .body("success", is(false))
                 .body("message", equalTo("Ingredient ids must be provided"));
     }
@@ -104,6 +105,6 @@ public class CreateOrderTest {
         var response = orderClient.createOrder(order, accessToken);
         // Согласно документации API, невалидный хеш вызывает 500 Internal Server Error
         response.then()
-                .statusCode(500);
+                .statusCode(SC_INTERNAL_SERVER_ERROR);
     }
 }
